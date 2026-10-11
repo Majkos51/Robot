@@ -4,7 +4,7 @@ from lib.robot_consts import Port, Sensor, Button, Light
 REGUL_PERIOD_MS = 10
 #hodnota svetla ke ktere robot miri
 # PID konstanty
-Kp, Ki, Kd = 4, 0.0, 13
+Kp, Ki, Kd = 3.8, 0.0, 13
 light_base_int = 50
 
 robot.init_motor(Port.M1)
@@ -19,7 +19,7 @@ robot.init_sensor(sensor_type = Sensor.OC_COLOR, port = Port.S1)
 def main():
     white = robot.sensors.light[Port.S1].reflection()
     #base vykon
-    motor_base_pwr = 100
+    motor_base_pwr = 90
     light_error_sum, light_error_prev = 0, 0
     print(light_base_int)
     while True:
@@ -28,12 +28,6 @@ def main():
         
         #Výpočet PID regulace
         light_error = light_base_int - light_intensity
-        #kdyz robot driftuje smerem do cerne cary, je treba vetsi korekce nez u opacneho pripadu
-        #(aby neprejel cernou caru na druhou stranu)
-        if light_error > 0:
-            add_kp = 1
-        else:
-            add_kp = 1
         
         #zmena vykonu
         P = Kp * light_error * add_kp
