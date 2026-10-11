@@ -1,10 +1,11 @@
 import time
 from lib.robot_consts import Port, Sensor, Button, Light
 
-PERIOD_MS = 10
+REGUL_PERIOD_MS = 10
 #hodnota svetla ke ktere robot miri
 # PID konstanty
-Kp, Ki, Kd = 0.4, 0.0, 0.6
+Kp, Ki, Kd = 4, 0.0, 13
+light_base_int = 50
 
 robot.init_motor(Port.M1)
 robot.init_motor(Port.M2)
@@ -16,27 +17,21 @@ robot.init_sensor(sensor_type = Sensor.OC_COLOR, port = Port.S1)
 
 # Hlavní smyčka
 def main():
-    robot.motors[Port.M1].set_power(45)
-    time.sleep(1)
-    robot.motors[Port.M1].set_power(0)
     white = robot.sensors.light[Port.S1].reflection()
-    robot.motors[Port.M2].set_power(45)
-    time.sleep(1)
-    robot.motors[Port.M2].set_power(0)
-    light_base_int = white/2
     #base vykon
-    motor_base_pwr = 45
+    motor_base_pwr = 100
     light_error_sum, light_error_prev = 0, 0
+    print(light_base_int)
     while True:
         light_intensity = robot.sensors.light[Port.S1].reflection()
         print(light_intensity)
-
-        Výpočet PID regulace
+        
+        #Výpočet PID regulace
         light_error = light_base_int - light_intensity
         #kdyz robot driftuje smerem do cerne cary, je treba vetsi korekce nez u opacneho pripadu
         #(aby neprejel cernou caru na druhou stranu)
         if light_error > 0:
-            add_kp = 1.2
+            add_kp = 1
         else:
             add_kp = 1
         
@@ -51,8 +46,8 @@ def main():
         light_error_sum += light_error
 
         #Nastavení Výkonu motorů
-        robot.motors[Port.M1].set_power(motor_base_pwr + motor_pwr)
-        robot.motors[Port.M2].set_power(motor_base_pwr - motor_pwr)
+        robot.motors[Port.M2].set_power(motor_base_pwr + motor_pwr)
+        robot.motors[Port.M1].set_power(motor_base_pwr - motor_pwr)
 
         buttons = robot.buttons.pressed_since()
         if buttons[Button.LEFT]:
