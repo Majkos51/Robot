@@ -1,5 +1,5 @@
 import time
-from lib.robot_consts import Port, Sensor, Button, Light
+from lib.robot_consts import Port, Sensor, Button
 
 #perioda mereni hodnoty
 REGUL_PERIOD_MS = 10
