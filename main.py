@@ -27,14 +27,6 @@ def main():
         
         #Výpočet PID regulace
         light_error = light_base_int - light_intensity
-        #kdyz robot driftuje smerem do cerne cary, je treba vetsi korekce nez u opacneho pripadu
-        #(aby neprejel cernou caru na druhou stranu)
-        #if light_error > 0:
-        #    add_kp = 1
-        #    add_kd = 1
-        #else:
-        #    add_kp = 1
-        #    add_kd = 1
         
         #zmena vykonu
         P = Kp * light_error
