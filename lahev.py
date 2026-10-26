@@ -2,12 +2,12 @@ import time
 from lib.robot_consts import Port, Sensor, Button, Light
 
 REGUL_PERIOD_MS = 10
-Kp, Ki, Kd = 1.8, 0.1, 16
-
+Kp, Ki, Kd = 1.8, 0.15, 19
+alr_avoided = False
 light_error_sum, light_error_prev = 0, 0
 
 # --- prahy pro objetí lahve (ladit na trati) ---
-DIST_OBSTACLE_MM = 180   # kdy začít objetí
+DIST_OBSTACLE_MM = 150  # kdy začít objetí
 AVOID_SIDE = 1           # 1 = objetí doprava, -1 = doleva
 PWR_TURN = 45
 PWR_FWD = 50
@@ -69,20 +69,34 @@ def avoid_bottle():
 
     # 1) odbočka od lahve
     drive_ms(
-        PWR_TURN * AVOID_SIDE,
-        -PWR_TURN * AVOID_SIDE,
-        T_TURN1,
+        100,
+        0,
+        250
     )
-    # 2) kolem lahve
-    drive_ms(PWR_FWD, PWR_FWD, T_FWD1)
-    # 3) zpět k čáře
+   
+    drive_ms(60, 60, 500)
+    
     drive_ms(
-        -PWR_TURN * AVOID_SIDE,
-        PWR_TURN * AVOID_SIDE,
-        T_TURN2,
+        0,
+        100,
+        360
+    )
+    drive_ms(60, 60, 1000)
+    
+    drive_ms(
+        0,
+        100,
+        250
+    )
+    drive_ms(60, 60, 450)
+    find_line(T_FIND_LINE_MAX)
+    drive_ms(
+        100,
+        0,
+        300
     )
     # 4) jet, dokud nenajde čáru
-    find_line(T_FIND_LINE_MAX)
+    
 
 
 print("base:", light_base_int)
@@ -96,7 +110,7 @@ while True:
         dist = robot.sensors.laser[Port.S2].distance_short()  # mm
         # print(dist)
 
-        if 0 < dist < DIST_OBSTACLE_MM:
+        if 0 < dist < DIST_OBSTACLE_MM and not alr_avoided:
             state = STATE_AVOID
             continue
 
@@ -120,6 +134,7 @@ while True:
 
     elif state == STATE_AVOID:
         avoid_bottle()
+        alr_avoided = True
         state = STATE_FOLLOW
 
 set_motors(0, 0)
